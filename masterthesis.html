@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reclaiming Urban Staircases — Yaqi Liao</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,600,700" rel="stylesheet">
+
+  <style>
+    /* ══════════════════════════════════════════════════════════
+       All rules scoped to body.thesis-theme — zero global leak
+       ══════════════════════════════════════════════════════════ */
+
+    /* ── Custom Properties on body (cascade to all children) ── */
+    body.thesis-theme {
+      --accent:  #5e35b1;
+      --dark:    #26272d;
+      --text:    #26292c;
+      --muted:   #9fa3a7;
+      --surface: #f5f5f8;
+      --bg:      #ffffff;
+      --border:  #e8e8ec;
+      --shadow:  rgba(0,0,0,0.08);
+      --trans:   0.25s ease-in-out;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      background: var(--bg);
+      color: var(--text);
+      transition: background var(--trans), color var(--trans);
+      overflow-x: hidden;
+    }
+
+    /* data-theme sits on <html>, body is a descendant */
+    [data-theme="dark"] body.thesis-theme {
+      --text:    #e8e8ec;
+      --muted:   #7a7d82;
+      --surface: #26272d;
+      --bg:      #1a1b1e;
+      --border:  #3a3b3e;
+      --shadow:  rgba(0,0,0,0.3);
+    }
+
+    .thesis-theme *,
+    .thesis-theme *::before,
+    .thesis-theme *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Accessibility Toggle ── */
+    .thesis-theme .a11y-toggle {
+      position: fixed; top: 22px; right: 26px; z-index: 1000;
+      display: flex; align-items: center; gap: 8px; padding: 8px 18px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 50px; cursor: pointer;
+      font-family: 'Montserrat', sans-serif; font-size: 11px;
+      font-weight: 600; letter-spacing: 1px; color: var(--text);
+      transition: background var(--trans), color var(--trans),
+                  border-color var(--trans), transform var(--trans),
+                  box-shadow var(--trans);
+      box-shadow: 0 2px 12px var(--shadow);
+    }
+    .thesis-theme .a11y-toggle:hover {
+      background: var(--accent); color: #fff; border-color: var(--accent);
+      transform: scale(1.04); box-shadow: 0 6px 18px rgba(94,53,177,0.3);
+    }
+    .thesis-theme .a11y-toggle .icon { font-size: 14px; }
+
+    /* ── Section Base ── */
+    .thesis-theme .section { padding: 100px 40px; }
+    .thesis-theme .section-inner { max-width: 1100px; margin: 0 auto; }
+    .thesis-theme .section-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 4px;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+    }
+    .thesis-theme .section-title {
+      font-size: clamp(28px, 4vw, 42px); font-weight: 700;
+      color: var(--text); line-height: 1.15; margin-bottom: 14px;
+    }
+    .thesis-theme .section-desc {
+      font-size: 14px; font-weight: 300; color: var(--muted);
+      max-width: 540px; line-height: 1.8; margin-bottom: 56px;
+    }
+
+    /* ══ HERO ══ */
+    .thesis-theme .hero {
+      min-height: 100vh; background: var(--dark);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden; padding: 80px 40px;
+    }
+    .thesis-theme .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(94,53,177,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(94,53,177,0.08) 1px, transparent 1px);
+      background-size: 64px 64px;
+    }
+    .thesis-theme .hero-glow {
+      position: absolute; width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(94,53,177,0.18) 0%, transparent 70%);
+      top: -100px; right: -100px; pointer-events: none;
+    }
+    .thesis-theme .hero-content {
+      position: relative; z-index: 2; max-width: 860px; width: 100%;
+    }
+    .thesis-theme .hero-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 4px;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 28px;
+    }
+    .thesis-theme .hero-title {
+      font-size: clamp(38px, 6.5vw, 76px); font-weight: 700; color: #fff;
+      line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 28px;
+    }
+    .thesis-theme .hero-title em { font-style: normal; color: var(--accent); }
+
+    /* Academic metadata strip */
+    .thesis-theme .thesis-meta {
+      display: flex; flex-wrap: wrap; align-items: center;
+      gap: 4px 0; margin-bottom: 44px;
+      font-size: 12px; font-weight: 300;
+      color: rgba(255,255,255,0.4); letter-spacing: 0.5px;
+    }
+    .thesis-theme .thesis-meta .meta-sep {
+      margin: 0 12px; color: var(--accent); opacity: 0.7;
+    }
+
+    /* Staircase quote */
+    .thesis-theme .staircase-quote {
+      display: flex; flex-direction: column; gap: 2px;
+      padding-left: 20px; border-left: 2px solid var(--accent);
+    }
+    .thesis-theme .staircase-quote .line {
+      font-size: clamp(13px, 1.6vw, 16px); font-weight: 300;
+      font-style: italic; color: rgba(255,255,255,0.55); line-height: 1.7;
+    }
+    .thesis-theme .staircase-quote .line:nth-child(1) { margin-left: 0; }
+    .thesis-theme .staircase-quote .line:nth-child(2) { margin-left: 40px; }
+    .thesis-theme .staircase-quote .line:nth-child(3) { margin-left: 80px; }
+    .thesis-theme .staircase-quote .line:nth-child(4) { margin-left: 120px; }
+    .thesis-theme .staircase-quote .attribution {
+      margin-left: 80px; margin-top: 14px; font-style: normal;
+      font-size: 11px; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent);
+    }
+
+    /* Methodology flowchart */
+    .thesis-theme .methodology-figure {
+      margin-top: 64px; text-align: center;
+    }
+    .thesis-theme .methodology-figure figcaption {
+      margin-top: 14px; font-size: 11px; font-weight: 600;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+    }
+
+    .thesis-theme .hero-scroll {
+      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      color: rgba(255,255,255,0.35); font-size: 10px;
+      letter-spacing: 3px; text-transform: uppercase;
+    }
+    .thesis-theme .scroll-line {
+      width: 1px; height: 44px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scrollPulse 2.2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    /* ══ THEORY / ACCORDION ══ */
+    .thesis-theme .theory-section { background: var(--surface); }
+    .thesis-theme .accordion { display: flex; flex-direction: column; gap: 3px; }
+    .thesis-theme .accordion-item {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 4px; overflow: hidden;
+      transition: box-shadow var(--trans), transform var(--trans);
+    }
+    .thesis-theme .accordion-item:hover {
+      box-shadow: 0 4px 20px var(--shadow); transform: translateY(-1px);
+    }
+    .thesis-theme .accordion-header {
+      display: flex; align-items: center; gap: 20px;
+      padding: 22px 26px; cursor: pointer;
+      list-style: none; user-select: none;
+    }
+    .thesis-theme .accordion-header::-webkit-details-marker { display: none; }
+    .thesis-theme .acc-num {
+      font-size: 11px; font-weight: 600; letter-spacing: 2px;
+      color: var(--accent); min-width: 26px;
+    }
+    .thesis-theme .acc-title { flex: 1; font-size: 15px; font-weight: 400; color: var(--text); }
+    .thesis-theme .acc-chevron { width: 16px; height: 16px; position: relative; flex-shrink: 0; }
+    .thesis-theme .acc-chevron::before,
+    .thesis-theme .acc-chevron::after {
+      content: ''; position: absolute; background: var(--accent);
+      border-radius: 2px; transition: transform var(--trans), opacity var(--trans);
+    }
+    .thesis-theme .acc-chevron::before { width: 10px; height: 1.5px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+    .thesis-theme .acc-chevron::after  { width: 1.5px; height: 10px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+    .thesis-theme details[open] .acc-chevron::after { transform: translate(-50%,-50%) rotate(90deg); opacity: 0; }
+    .thesis-theme .accordion-body {
+      padding: 20px 26px 26px 72px; font-size: 14px; font-weight: 300;
+      color: var(--muted); line-height: 1.85;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Figure placeholder inside accordion */
+    .thesis-theme .feminist-figure {
+      margin-top: 20px; display: flex; flex-direction: column; gap: 10px;
+      border: 1px dashed var(--border); border-radius: 4px;
+      padding: 24px; text-align: center; background: var(--surface);
+    }
+    .thesis-theme .feminist-figure img { max-width: 100%; height: auto; border-radius: 2px; }
+    .thesis-theme .feminist-figure figcaption {
+      font-size: 11px; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--muted);
+    }
+
+    /* ══ CASES ══ */
+    .thesis-theme .cases-section { background: var(--bg); }
+    .thesis-theme .cases-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+      gap: 48px 40px;
+    }
+    .thesis-theme .case-card { display: flex; flex-direction: column; gap: 14px; }
+    .thesis-theme .case-meta { display: flex; align-items: baseline; gap: 10px; }
+    .thesis-theme .case-num {
+      font-size: 11px; font-weight: 600; letter-spacing: 2px; color: var(--accent);
+    }
+    .thesis-theme .case-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .thesis-theme .case-location {
+      margin-left: auto; font-size: 11px; font-weight: 400;
+      letter-spacing: 1px; color: var(--muted);
+    }
+    .thesis-theme .slider-wrap {
+      position: relative; width: 100%; aspect-ratio: 4/3;
+      overflow: hidden; border-radius: 4px; cursor: col-resize;
+      background: var(--surface); user-select: none;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    .thesis-theme .slider-after,
+    .thesis-theme .slider-before {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .thesis-theme .slider-after  { z-index: 1; }
+    .thesis-theme .slider-before { z-index: 2; clip-path: inset(0 50% 0 0); transition: none; }
+    .thesis-theme .slider-handle {
+      position: absolute; top: 0; bottom: 0; left: 50%; width: 2px;
+      transform: translateX(-50%); background: rgba(255,255,255,0.9);
+      z-index: 3; pointer-events: none;
+    }
+    .thesis-theme .slider-handle::before {
+      content: ''; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%); width: 38px; height: 38px;
+      background: #fff; border-radius: 50%; box-shadow: 0 2px 14px rgba(0,0,0,0.25);
+    }
+    .thesis-theme .slider-arrows {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      z-index: 4; font-size: 11px; color: var(--dark);
+      pointer-events: none; letter-spacing: -1px;
+    }
+    .thesis-theme .label-before,
+    .thesis-theme .label-after {
+      position: absolute; bottom: 14px; z-index: 4; font-size: 10px;
+      font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      color: #fff; background: rgba(0,0,0,0.42); padding: 4px 10px;
+      border-radius: 50px; pointer-events: none;
+    }
+    .thesis-theme .label-before { left: 14px; }
+    .thesis-theme .label-after  { right: 14px; }
+    .thesis-theme .case-desc {
+      font-size: 13px; font-weight: 300; color: var(--muted); line-height: 1.75;
+    }
+
+    /* ══ CSS TOOLTIP ══ */
+    .thesis-theme .tooltip-trigger {
+      position: relative; display: inline-block;
+      font-weight: 600; color: var(--accent);
+      cursor: help; border-bottom: 1px dotted var(--accent);
+    }
+    .thesis-theme .tooltip-bubble {
+      position: absolute; bottom: calc(100% + 10px); left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      background: var(--accent); color: #fff;
+      font-size: 12px; font-weight: 300; font-style: normal;
+      line-height: 1.65; padding: 14px 18px; border-radius: 8px;
+      width: 260px; text-align: left; white-space: normal;
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--trans), transform var(--trans);
+      box-shadow: 0 8px 28px rgba(94,53,177,0.35);
+      z-index: 100;
+    }
+    .thesis-theme .tooltip-bubble::after {
+      content: ''; position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 7px solid transparent; border-top-color: var(--accent);
+    }
+    .thesis-theme .tooltip-trigger:hover .tooltip-bubble {
+      opacity: 1; transform: translateX(-50%) translateY(0);
+    }
+
+    /* ══ REFLECTION SECTION ══ */
+    .thesis-theme .reflection-section { background: var(--surface); }
+    .thesis-theme .reflection-body {
+      font-size: 15px; font-weight: 300;
+      color: var(--text); line-height: 2; max-width: 720px;
+    }
+
+    /* ══ CONCLUSION SECTION ══ */
+    .thesis-theme .conclusion-section { background: var(--bg); }
+    .thesis-theme .conclusion-body {
+      font-size: 15px; font-weight: 300;
+      color: var(--text); line-height: 2; max-width: 720px;
+      margin-bottom: 44px;
+    }
+    .thesis-theme .download-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 0 34px; line-height: 54px;
+      background: var(--accent); color: #fff;
+      font-family: 'Montserrat', sans-serif; font-size: 12px;
+      font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      text-decoration: none; border-radius: 50px;
+      transition: background var(--trans), transform var(--trans), box-shadow var(--trans);
+      box-shadow: 0 4px 18px rgba(94,53,177,0.28);
+    }
+    .thesis-theme .download-btn:hover {
+      background: #4527a0; color: #fff;
+      transform: scale(1.04); box-shadow: 0 8px 28px rgba(94,53,177,0.42);
+    }
+    .thesis-theme .download-btn .btn-icon { font-size: 15px; }
+
+    /* ══ FOOTER ══ */
+    .thesis-theme .thesis-footer {
+      padding: 56px 40px; background: var(--dark); text-align: center;
+    }
+    .thesis-theme .thesis-footer p {
+      font-family: 'Montserrat', sans-serif; font-size: 12px;
+      font-weight: 300; color: rgba(255,255,255,0.3); letter-spacing: 1px;
+    }
+    .thesis-theme .thesis-footer a {
+      color: var(--accent); text-decoration: none; transition: color var(--trans);
+    }
+    .thesis-theme .thesis-footer a:hover { color: #fff; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .thesis-theme .section { padding: 70px 24px; }
+      .thesis-theme .hero { padding: 100px 24px 80px; }
+      .thesis-theme .staircase-quote .line:nth-child(2) { margin-left: 20px; }
+      .thesis-theme .staircase-quote .line:nth-child(3) { margin-left: 40px; }
+      .thesis-theme .staircase-quote .line:nth-child(4) { margin-left: 60px; }
+      .thesis-theme .staircase-quote .attribution       { margin-left: 40px; }
+      .thesis-theme .cases-grid { grid-template-columns: 1fr; }
+      .thesis-theme .accordion-body { padding-left: 26px; }
+      .thesis-theme .a11y-toggle span:not(.icon) { display: none; }
+      .thesis-theme .tooltip-bubble { width: 210px; }
+    }
+  </style>
+</head>
+<body class="thesis-theme">
+
+  <!-- ══ NAVBAR ══ -->
+  <style>
+    /* Navbar purple-theme overrides scoped to .thesis-theme */
+    .thesis-theme #masthead { background: #fff; border-bottom: 1px solid var(--border); }
+    [data-theme="dark"] .thesis-theme #masthead { background: #1a1b1e; border-bottom-color: var(--border); }
+    .thesis-theme .site-navigation { padding: 0; }
+    .thesis-theme .site-navigation .nav.navbar-nav > li > a:hover,
+    .thesis-theme .site-navigation .nav.navbar-nav > li > a:focus {
+      color: var(--accent) !important;
+    }
+    .thesis-theme .site-navigation .nav.navbar-nav > li.active > a,
+    .thesis-theme .site-navigation .nav.navbar-nav > li.active > a:hover {
+      color: var(--accent) !important;
+      border-bottom: 2px solid var(--accent);
+    }
+    .thesis-theme .site-navigation .dropdown-menu > li > a:hover,
+    .thesis-theme .site-navigation .dropdown-menu > li > a:focus {
+      background: var(--accent) !important;
+      color: #fff !important;
+    }
+  </style>
+
+  <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <link href="assets/css/responsive.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
+
+  <header id="masthead" class="site-header">
+    <nav id="primary-navigation" class="site-navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="site-title"><span>Yaqi </span>Liao</a>
+        </div><!-- /.navbar-header -->
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="#" class="dropdown-toggle" data-toggle="dropdown">Info<i class="fa fa-caret-down hidden-xs" aria-hidden="true"></i></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="aboutme.html">About me</a></li>
+              <li><a href="CV_Liao_Yaqi.html">CV</a></li>
+            </ul>
+          </li>
+          <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Portfolio<i class="fa fa-caret-down hidden-xs" aria-hidden="true"></i></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="portfolio.html">Architecture</a></li>
+              <li><a href="photography.html">Photography</a></li>
+            </ul>
+          </li>
+          <li><a href="blog.html">Journal</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </nav><!-- /.site-navigation -->
+  </header><!-- /#masthead -->
+
+  <!-- Accessibility Toggle -->
+  <button class="a11y-toggle" id="themeToggle" aria-label="Toggle dark mode">
+    <span class="icon" id="themeIcon">☽</span>
+    <span id="themeLabel">Dark</span>
+  </button>
+
+  <!-- ══ HERO ══ -->
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+
+    <div class="hero-content">
+      <p class="hero-eyebrow">Master's Thesis &nbsp;·&nbsp; Aalto University &nbsp;·&nbsp; 2024</p>
+      <h1 class="hero-title">
+        Reclaiming<br><em>Urban Staircases</em>
+      </h1>
+
+      <!-- Academic Metadata -->
+      <div class="thesis-meta">
+        <span>Author: Yaqi Liao</span>
+        <span class="meta-sep">|</span>
+        <span>Aalto University</span>
+        <span class="meta-sep">|</span>
+        <span>Supervisors: Jenni Reuter, Anni Vartola</span>
+        <span class="meta-sep">|</span>
+        <span>2024</span>
+      </div>
+
+      <blockquote class="staircase-quote">
+        <span class="line">"The city has always been</span>
+        <span class="line">designed for a particular kind of body —</span>
+        <span class="line">mobile, unencumbered,</span>
+        <span class="line">unhurried by the demands of care."</span>
+        <span class="line attribution">— Leslie Kern, Feminist City, 2020</span>
+      </blockquote>
+          </div>
+  </section>
+      </div>
+  </section>
+
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- ══ THEORY ══ -->
+  <section class="section theory-section">
+    <div class="section-inner">
+      <p class="section-label">Theoretical Framework</p>
+      <h2 class="section-title">The Feminist City</h2>
+      <p class="section-desc">Six core principles through which Leslie Kern reframes urban life — each applied here to evaluate Finnish staircase typologies.</p>
+
+      <div class="accordion">
+
+        <details class="accordion-item">
+          <summary class="accordion-header">
+            <span class="acc-num">01</span>
+            <span class="acc-title">City Beyond Binaries</span>
+            <span class="acc-chevron"></span>
+          </summary>
+          <div class="accordion-body">
+            <p>The concentration on the woman/man-home/work as a main factor in our city design has been widely discussed. In 1990, the Joy Boys (pp. 249-250) posited that these binary divisions have not only limited women’s domestic space but have also ignored and marginalized crucial issues of class, race, and culture. Over time, we must acknowledge significant advancements in comprehending women’s needs. The women-only passenger car in Japan is one of the examples. However, rape myths intensified their harshness toward the victims. “What were you wearing?” and “Why didn’t you report it?” were classic questions women faced after the tragedy. While gender-oriented design makes women’s insecurities visible, it also perpetuates these rape myths.
+According to Leslie Kern in Feminist City (2020, p. 51), relying heavily on the state for radical transformation is a waste of time, and in the case of Japan, even dangerous for women. The “women only” approach views women as a problem that the “progressive” city needs to solve or eliminate (Kern, 2020, p. 51). However, the essentialized binary of opposing spheres (public/private, outside/inside, economy/family, work/home, distance/intimacy, duty/love) oversimplifies the complexity of social society and easily marginalizes groups not included in these binaries (Jarvis et al., 2009, pp. 10-11). The urban staircase in Feminist City, which transcends binaries, fosters a more collective and collaborative approach to the intersection of multiple identities, thereby recognizing the diversity of the urban experience.</p>
+            <figure class="feminist-figure">
+              <img src="assets/img/citybeyondbinary.jpg" alt="City Beyond Binaries — 在此填入图片">
+              <figcaption> The women-only car in trains intends to provide safe space for women. The intention is to keep female students safe from the advances of lecherous men during the peak hours (Kendall, 2013).</figcaption>
+            </figure>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-header">
+            <span class="acc-num">02</span>
+            <span class="acc-title">City of Mobility</span>
+            <span class="acc-chevron"></span>
+          </summary>
+          <div class="accordion-body">
+            <p>‘A feminist city must be one where barriers - physical and social are dismantled, where all bodies are welcome and accommodated.’ Leslie Kern (2020, p. 52) wrote the statement. 
+Erin Durkin (2019), in her report, highlighted that the majority of New York’s stations lack elevators. To extend Kern’s City of Moms, the struggle on inaccessible public transit for moms with strollers can be extended to inaccessible to various groups, including disabled people, children, and seniors. These individuals face challenges in navigating staircases without handrails, turnstiles, narrow spaces for strollers, and fast-changing traffic lights due to height differences. 
+This inadequate design forces them to remain at home or in institutions, avoiding the uncertainty and challenges posed by public spaces. Urban infrastructure, such as public staircases, should develop to bridge the gaps and make these invisible groups visible in urban life as the responsibility for care work begins to spread more evenly across society. Ramps, lifts, or elevators in public spaces can significantly improve physical accessibility, but true accessibility extends beyond that. Social justice requires not only meeting legal requirements, but also evaluating the rights of those who are vulnerable on an equal basis with everyone else.
+It encompasses the psychological comfort of visibility and the entitlement to relish the urban landscape. The City of Mobility advocates public staircases that come in a variety of shapes and functions, aiming to make the city more accessible to everyone, both physically and mentally. These inclusive staircases can encourage more people to use public transportation and get involved in social caring.
+</p>
+            <figure class="feminist-figure">
+              <img src="assets/img/cityofmoibility.jpg" alt="City of Mobility — 在此填入图片">
+              <figcaption>Top: Women still had to move the stroller by themselves, and it would be even harder if there were lots of people in the subway; Bottom:117 out of 472 New York subway stations are fully accessible (Durkin, 2019).</figcaption>
+            </figure>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-header">
+            <span class="acc-num">03</span>
+            <span class="acc-title">City of Safety</span>
+            <span class="acc-chevron"></span>
+          </summary>
+          <div class="accordion-body">
+            <p>Based on Plan International (2024, p. 26), 27% of girls and young women felt at risk of sexual violence compared to 17% of boys. Women feel more unsafe than men, which limits their public space. From a feminist perspective, the question is not, “Why do women have fear?” but instead, “Why is women’s fear so deeply embedded socially and culturally?” (Kern, 2020, p. 121).
+Over an extended period, the man-oriented city emerges under the model of men as protectors, while women require protection from men. This patriarchal power model, which primarily focuses on heterosexual males, not only affects women but also influences men, implying that they must be strong. Moreover, this model easily ignores cultural, financial, and identical influence. People experience the conflict in diverse ways, so the most vulnerable groups either choose to stay at home, go out with men, or stay in a safer environment. Individuals’ experiences with danger, rumors, urban myths, and communities influence perceptions of safety in the city. Instead of focusing on the needs and desires of women, an intersectional approach is required to start from the most vulnerable needs and perspective. 
+Inspired by Leslie Kern’s City of Fear (2020, p. 134), the concept of a safe public staircase as a free and open urban infrastructure for all signifies that a safe city will not rely solely on private safety measures or the police to combat crime. It welcomes more people to use the public space and encourages them to go out of their homes to avoid both private and public violence. The design of City of Safety encourages people to gather and express themselves, ideally without passive surveillance, as everyone's responsibility creates safety.
+</p>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-header">
+            <span class="acc-num">04</span>
+            <span class="acc-title">City of Networking</span>
+            <span class="acc-chevron"></span>
+          </summary>
+          <div class="accordion-body">
+            <p>Urban planning and city politics in the City of Friends (Kern, 2020), legal friendships are not taken as seriously as marriage in urban planning and city politics. The organization Making Space for Girls, which focuses on parks for teenage girls, draws attention to the disparity in park usage between boys and girls (Walker & Clark, 2023). The masculine atmosphere, which includes oral teasing from boys, boy-dominated street games, and the expectation of appropriate social behavior in a patriarchal structure, compresses the public space for girls. Furthermore, consumerism shapes urban spaces by associating socialization with consumption, which discourages people, especially teenage girls, from using these public areas freely (Thomas, 2005). This also explains why AI imagined Feminist City as a shopping mall city, reflecting the commercial nature of many urban spaces.
+Networking, a potent tool for fostering diverse relationships, surpasses friendship by necessitating creative public spaces that don’t strictly adhere to specific functions. Architects and designers should design public spaces, such as a public staircase, to accommodate undefined activities such as talking, resting, or simply doing nothing. Since the function of a staircase is subject to change as social values evolve, these public spaces serve as unfinished collaborative design projects that encourage the public to unlock their potential. Such spaces foster both physical and mental connections, allowing people to create relationships on their own terms without the constraints of predefined purposes.
+</p>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-header">
+            <span class="acc-num">05</span>
+            <span class="acc-title">City of Sharing</span>
+            <span class="acc-chevron"></span>
+          </summary>
+          <div class="accordion-body">
+            <p> The right to express advocacy in City of Protest (Kern, 2020, pp. 97-116) signifies the desire to stand out from traditional heteronormative nuclear family structures. In order to transcend societal boundaries, I believe that Feminist City should encourage everyone to assume caregiving responsibilities on their own initiative, rather than consistently protesting against oppression. The City of Sharing extends these concepts by defining caregiving as a shared responsibility, not exclusive to women or men. Sharing not only makes the invisible visible again, but it also actively reclaims spaces for diverse caregiving responsibilities, regardless of their sexual, political, or cultural identities.
+The example of Filipino maids in Singapore highlights a notable failure in the attempt to redistribute childcare and domestic duties. Yeoh (2000) discussed how these foreign domestic workers often have to leave their own children and spouses behind in their home countries, a painful and unsustainable solution that disproportionately burdens even more vulnerable groups. Similar to the discussion on motherhood and fatherhood, which are closely related to the heteronormative nuclear family structure, Feminist City fosters diverse kinship networks and creates opportunities for social reproduction sharing. People have the opportunity to share their experiences, emotions, and culinary skills.
+Sharing reduces the waste of resources that private ownership causes, and it is more sustainable for the caregiving society. The collective kitchen Care Yoshikawa in Saitama, Japan not only fosters close connections among the local elderly population but also serves as a wonderful model for local kids to learn through hands-on cooking experiences (Puigjaner, 2017). Besides this specific community and architectural institution, caring can also occur in transitional areas like public staircases. Embedding care in urban infrastructure helps shift caregiving responsibilities away from specific groups and encourages broader participation in social reproduction.
+</p>
+            <figure class="feminist-figure">
+              <img src="assets/img/Care Yoshikawa.jpg" alt="City of Sharing — 在此填入图片">
+              <figcaption>Care Yoshikawa: A group of elderly women cook dinner for around thirty children (Puigjaner, 2017).</figcaption>
+            </figure>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-header">
+            <span class="acc-num">06</span>
+            <span class="acc-title">City of Affordability</span>
+            <span class="acc-chevron"></span>
+          </summary>
+          <div class="accordion-body">
+            <p> Capitalist societies and gentrified urban planning, as discussed in the City of Networking and City of Sharing, often perpetuate stereotypes about the provision of care. As Kern described in City of One (Kern, 2020, pp. 76-116), urban planning creates economic barriers to affording housing alone. Furthermore, schools, cafés, clean parks, bookshops, and shopping malls are typically located near efficient transit hubs (Kern, 2020). This uneven distribution of resources disproportionately affects the poor, working class, and immigrants, who may find themselves in unsafe situations due to a lack of economic means for security. While Feminist City seeks to eliminate the pressures and disparities between different groups influenced by economic factors, it’s difficult to overlook the impact of these factors within a capitalist social structure. 
+While housing and childcare have long been central issues in this discussion, people often misperceive public spaces as “free spaces.” In reality, while streets and public staircases are open to all, they often lack attractions or facilities, which inadvertently force people to enter shopping malls or other consumption places. The City of Affordability envisions public spaces that offer more than basic functions. These spaces would provide areas for sitting, reading, drawing, and other diverse activities, making them accessible to everyone, regardless of economic conditions.</p>
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CASES ══ -->
+  <section class="section cases-section">
+    <div class="section-inner">
+      <p class="section-label">Four Case Studies &nbsp;·&nbsp; Finland</p>
+      <h2 class="section-title">Reimagine the Public Staircase in Feminist City</h2>
+      <p class="section-desc">Four Finnish urban staircase sites documented and reimagined through AI-assisted spatial proposals. Drag the divider to compare existing conditions with design interventions.</p>
+
+      <div class="cases-grid">
+
+        <!-- Case 1 -->
+        <div class="case-card">
+          <div class="case-meta">
+            <span class="case-num">01</span>
+            <span class="case-title">Steps of Helsinki Cathedral</span>
+            <span class="case-location">Helsinki</span>
+          </div>
+          <div class="slider-wrap" data-slider>
+            <img class="slider-after"  src="assets/img/HLC2.png" alt="AI proposal — Case 1">
+            <img class="slider-before" src="assets/img/HLC.jpg" alt="Existing condition — Case 1">
+            <div class="slider-handle"><div class="slider-arrows">&#8592;&#8594;</div></div>
+            <span class="label-before">Existing</span>
+            <span class="label-after">Midjourney Proposal</span>
+          </div>
+          <p class="case-desc">When the capital was transferred to Helsinki in 1812, Helsinki Cathedral symbolized the new political and religious center of Finland (Navigator, n.d). In the 1840s, a 60-meter granite straight stairway replaced the original guard building in front of the cathedral, connecting it to Senate Square. The grand, symmetrical stairway leads up to the main entrance, creating a striking approach. These steps elevate the main church above Senate Square, emphasizing the cathedral’s dominant position in the cityscape.</p>
+        </div>
+
+        <!-- Case 2 -->
+        <div class="case-card">
+          <div class="case-meta">
+            <span class="case-num">02</span>
+            <span class="case-title">Säynätsalo Town Hall</span>
+            <span class="case-location">Tampere</span>
+          </div>
+          <div class="slider-wrap" data-slider>
+            <img class="slider-after"  src="assets/img/SYH2.png" alt="AI proposal — Case 2">
+            <img class="slider-before" src="assets/img/SYH.jpg" alt="Existing condition — Case 2">
+            <div class="slider-handle"><div class="slider-arrows">&#8592;&#8594;</div></div>
+            <span class="label-before">Existing</span>
+            <span class="label-after">Midjourney Proposal</span>
+          </div>
+          <p class="case-desc">Completed in 1952, Säynätsalo town hall serves as a multifunctional civic space with a variety of functions. The center features a square courtyard, rising one story above its surroundings. There are two staircases on the site to enter the central courtyard from ground level. The linear and formal staircase with two flights is located on the east side, whereas there is an irregular grass staircase located on the west.</p>
+        </div>
+
+        <!-- Case 3 -->
+        <div class="case-card">
+          <div class="case-meta">
+            <span class="case-num">03</span>
+            <span class="case-title">University of Technology, 
+Otaniemi (Aalto University)</span>
+            <span class="case-location">Espoo</span>
+          </div>
+          <div class="slider-wrap" data-slider>
+            <img class="slider-after"  src="assets/img/AALTO2.png" alt="AI proposal — Case 3">
+            <img class="slider-before" src="assets/img/AALTO.png" alt="Existing condition — Case 3">
+            <div class="slider-handle"><div class="slider-arrows">&#8592;&#8594;</div></div>
+            <span class="label-before">Existing</span>
+            <span class="label-after">Midjourney Proposal</span>
+          </div>
+          <p class="case-desc">The University of Technology of Otaniemi (now part of Aalto University) is set within the modernist landscape of the Otaniemi district. The Main Building, resembling an amphitheatre, served as a terraced “festival square,” rising higher than its surroundings (Aalto et al., 2008, p. 13). The first planning stage aimed to design it as an iconic landmark of the campus. </p>
+        </div>
+
+        <!-- Case 4 -->
+        <div class="case-card">
+          <div class="case-meta">
+            <span class="case-num">04</span>
+            <span class="case-title">Löyly Helsinki</span>
+            <span class="case-location">Helsinki</span>
+          </div>
+          <div class="slider-wrap" data-slider>
+            <img class="slider-after"  src="assets/img/LLY2.png" alt="AI proposal — Case 4">
+            <img class="slider-before" src="assets/img/LLY.jpg" alt="Existing condition — Case 4">
+            <div class="slider-handle"><div class="slider-arrows">&#8592;&#8594;</div></div>
+            <span class="label-before">Existing</span>
+            <span class="label-after">Midjourney Proposal</span>
+          </div>
+          <p class="case-desc">Löyly, a Finnish term, refers to the steam produced when water evaporates on hot stones in a sauna. Located in Hernesaari, which was turned from an industrial area to a residential area in the future, Löyly was designed to activate the areas as new public spaces for visitors. The large roof staircases not only serve as a roof for the interior spaces but also provide access to the terraces on top of the building.
+</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ REFLECTION ══ -->
+  <section class="section reflection-section">
+    <div class="section-inner">
+      <p class="section-label">Analysis</p>
+      <h2 class="section-title">From Human-Centered to Space-Active Design</h2>
+      <p class="section-desc">Through these four case studies, the design approach has transformed from a strong patriarchal hierarchy and masculine atmosphere to a human-centered design approach, starting to think about the relationship between humans, nature, and technology, this human-centered approach pursued a poetic and harmonic relationship. The design process of human-centered design results in those who have more power deciding what is “human”; consequently, the controversy reinforces the patriarchal structure. Additionally, this approach started with specific groups that are no longer adaptable enough to respond to the constant flux of social values, users, and functions. </p>
+      <p class="reflection-body">
+      The needs of different users are still important in the future; however, architects and related institutions need to transition from human-centered design to space-active design, which triggers great spontaneous creation and close collaborative connections among different people. Increasing public space usage is an architectural strategy to make more people visible and help identify more identities. This thesis used Midjourney as a research tool to further explore the space-activated approach in the design process. </p>
+        <span class="tooltip-trigger"> 2026 Reflection
+          <span class="tooltip-bubble"> After a year in actual practice, I’ve realized that 'space-active design' is more crucial than ever. Why? Because the rigid functions of spaces are disappearing. Whether it's driven by budget constraints, shifting user behaviors, or the evolving role of architecture itself, space is no longer just a passive container for planned activities. Instead, it must be a catalyst that triggers spontaneous interactions. We typically start every project by asking: “Who are we designing for?”To be one step further, honestly, that question is getting harder to answer. People are more transient and diverse than ever before. This is where space-active design comes in. It’s an approach to achieve true spatial equity—creating inclusive spaces that welcome everyone, without forcing us to label or define exactly who they are. I am still on the journey of exploring how to fully realize this in our daily work, but I believe it's a journey worth taking </span>
+        </span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ CONCLUSION ══ -->
+  <section class="section conclusion-section">
+    <div class="section-inner">
+      <p class="section-label">Conclusion</p>
+      <h2 class="section-title">Closing Thoughts</h2>
+
+      <p class="conclusion-body">
+This thesis studies the urban staircase through a feminist perspective, underscoring how patriarchal power structures influence and shape public spaces. Using the three typologies of staircases, I identified the distinct roles that function-oriented, landscape, and social staircases serve in reflecting social values. I further analyzed four case studies using these typologies to illustrate the power structure within the Finnish cultural background, highlighting distinct shifts in power. Steps in front of Helsinki Cathedral indicated the shift from religious and royal power to government and public. Säynätsalo Town Hall’s grassy stairs indicate the shift from religious and royal power to government and the public. The amphitheater stair in the University of Technology, Otaniemi, now known as Aalto University, evolved from Aalto’s original concept of teacher/student–performer/lisener to a diverse student activities space. Finally, the initial design of Löyly Helsinki aimed to serve as an urban platform, benefiting the surrounding residents and influencing a wider audience in Helsinki. These staircases mirror the evolution of urban design, aligning with the shifts in social values throughout Finland’s historical journey.
+
+        &nbsp;
+        <span class="tooltip-trigger">2026 Reflection
+          <span class="tooltip-bubble">Looking back over the past two years, my biggest takeaway is the dramatic disappearance of technological barriers. The anxieties we once had about 'how to draw diagrams,' 'how to format,' and 'how to write code' have been reduced to rock bottom by the explosive growth in computing power. Now, the only remaining challenges are how many tokens we can allocate and how we can summarize our workflows into replicable methods and continuously optimize them.</span>
+        </span>
+      </p>
+
+      <a class="download-btn" href="master_Liao_Yaqi_2025.html" aria-label="Download full thesis PDF">
+        <span class="btn-icon">&#8595;</span>
+        Download Full Thesis (PDF)
+      </a>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="thesis-footer">
+    <p>Yaqi Liao &nbsp;·&nbsp; <a href="index.html">Yaqi Liao portfolio</a> &nbsp;·&nbsp; Master's Thesis, Aalto University 2024</p>
+  </footer>
+
+  <script src="thesis.js"></script>
+</body>
+</html>
